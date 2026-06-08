@@ -58,33 +58,8 @@ function renderTable(data) {
         return;
     }
 
-    // Use your exact column list for the table headers
-    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Course Title', 'Mode of training', 'Location', 'Status', 'Link'];
-    
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headersRow.appendChild(th);
-    });
-
-    // Populate data rows
-    data.forEach(row => {
-        const tr = document.createElement('tr');
-        // Display the data inside the HTML table
-function renderTable(data) {
-    const headersRow = document.getElementById('table-headers');
-    const tableBody = document.getElementById('table-body');
-    
-    headersRow.innerHTML = '';
-    tableBody.innerHTML = '';
-
-    if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No training records found matching those filters.</td></tr>';
-        return;
-    }
-
-    // Standard headers displayed on the dashboard
-    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Course Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    // Standard headers displayed on the dashboard layout
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
     
     headers.forEach(header => {
         const th = document.createElement('th');
@@ -98,13 +73,13 @@ function renderTable(data) {
         headers.forEach(header => {
             const td = document.createElement('td');
             
-            // Smart fallback for the 'From' column in case of trailing spaces in the sheet
+            // Smart fallback tracking for the 'From' column in case of hidden spaces or casing variations
             let cellValue = row[header];
             if (header === 'From' && !cellValue) {
                 cellValue = row['From '] || row['from'] || '';
             }
 
-            // If it's the link column and contains a URL, make it clickable
+            // If it's the link column and contains a web URL, make it a clickable button
             if (header === 'Link' && cellValue && cellValue.trim().startsWith('http')) {
                 td.innerHTML = `<a href="${cellValue.trim()}" target="_blank">View Link</a>`;
             } else {
@@ -115,27 +90,14 @@ function renderTable(data) {
         tableBody.appendChild(tr);
     });
 }
-            // If it's the link column and contains a URL, make it clickable
-            if (header === 'Link' && row[header] && row[header].startsWith('http')) {
-                td.innerHTML = `<a href="${row[header]}" target="_blank">View Link</a>`;
-            } else {
-                td.textContent = row[header] || '';
-            }
-            tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-    });
-}
 
 // Filter data when a user changes any dropdown selection
 function filterData() {
-    // Get values and trim any hidden spaces
     const programFilter = document.getElementById('program-select').value.trim();
     const modeFilter = document.getElementById('mode-select').value.trim();
     const statusFilter = document.getElementById('status-select').value.trim();
 
     const filtered = currentData.filter(row => {
-        // Safely extract spreadsheet values and trim spaces for a perfect match
         const rowProgram = row['Program Name'] ? row['Program Name'].trim() : '';
         const rowMode = row['Mode of training'] ? row['Mode of training'].trim() : '';
         const rowStatus = row['Status'] ? row['Status'].trim() : '';
@@ -149,6 +111,7 @@ function filterData() {
 
     renderTable(filtered);
 }
+
 // Listen for dropdown changes
 document.getElementById('program-select').addEventListener('change', filterData);
 document.getElementById('mode-select').addEventListener('change', filterData);
