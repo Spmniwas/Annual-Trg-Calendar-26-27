@@ -86,21 +86,26 @@ function renderTable(data) {
 
 // Filter data when a user changes any dropdown selection
 function filterData() {
-    const programFilter = document.getElementById('program-select').value;
-    const modeFilter = document.getElementById('mode-select').value;
-    const statusFilter = document.getElementById('status-select').value;
+    // Get values and trim any hidden spaces
+    const programFilter = document.getElementById('program-select').value.trim();
+    const modeFilter = document.getElementById('mode-select').value.trim();
+    const statusFilter = document.getElementById('status-select').value.trim();
 
     const filtered = currentData.filter(row => {
-        const filtered = currentData.filter(row => {
-        const matchesProgram = programFilter === 'all' || row['Program Name']?.trim() === programFilter;
-        const matchesMode = modeFilter === 'all' || row['Mode of training']?.trim() === modeFilter;
-        const matchesStatus = statusFilter === 'all' || row['Status']?.trim() === statusFilter;
+        // Safely extract spreadsheet values and trim spaces for a perfect match
+        const rowProgram = row['Program Name'] ? row['Program Name'].trim() : '';
+        const rowMode = row['Mode of training'] ? row['Mode of training'].trim() : '';
+        const rowStatus = row['Status'] ? row['Status'].trim() : '';
+
+        const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
+        const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
+        const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
+
         return matchesProgram && matchesMode && matchesStatus;
     });
 
     renderTable(filtered);
 }
-
 // Listen for dropdown changes
 document.getElementById('program-select').addEventListener('change', filterData);
 document.getElementById('mode-select').addEventListener('change', filterData);
