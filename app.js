@@ -91,7 +91,8 @@ function filterData() {
     const statusFilter = document.getElementById('status-select').value;
 
     const filtered = currentData.filter(row => {
-        const matchesProgram = programFilter === 'all' || row['Programme Name']?.trim() === programFilter;
+        const filtered = currentData.filter(row => {
+        const matchesProgram = programFilter === 'all' || row['Program Name']?.trim() === programFilter;
         const matchesMode = modeFilter === 'all' || row['Mode of training']?.trim() === modeFilter;
         const matchesStatus = statusFilter === 'all' || row['Status']?.trim() === statusFilter;
         return matchesProgram && matchesMode && matchesStatus;
