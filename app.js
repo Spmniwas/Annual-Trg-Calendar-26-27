@@ -70,8 +70,51 @@ function renderTable(data) {
     // Populate data rows
     data.forEach(row => {
         const tr = document.createElement('tr');
+        // Display the data inside the HTML table
+function renderTable(data) {
+    const headersRow = document.getElementById('table-headers');
+    const tableBody = document.getElementById('table-body');
+    
+    headersRow.innerHTML = '';
+    tableBody.innerHTML = '';
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No training records found matching those filters.</td></tr>';
+        return;
+    }
+
+    // Standard headers displayed on the dashboard
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Course Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    
+    headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headersRow.appendChild(th);
+    });
+
+    // Populate data rows
+    data.forEach(row => {
+        const tr = document.createElement('tr');
         headers.forEach(header => {
             const td = document.createElement('td');
+            
+            // Smart fallback for the 'From' column in case of trailing spaces in the sheet
+            let cellValue = row[header];
+            if (header === 'From' && !cellValue) {
+                cellValue = row['From '] || row['from'] || '';
+            }
+
+            // If it's the link column and contains a URL, make it clickable
+            if (header === 'Link' && cellValue && cellValue.trim().startsWith('http')) {
+                td.innerHTML = `<a href="${cellValue.trim()}" target="_blank">View Link</a>`;
+            } else {
+                td.textContent = cellValue ? cellValue.trim() : '';
+            }
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+}
             // If it's the link column and contains a URL, make it clickable
             if (header === 'Link' && row[header] && row[header].startsWith('http')) {
                 td.innerHTML = `<a href="${row[header]}" target="_blank">View Link</a>`;
