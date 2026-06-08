@@ -1,101 +1,101 @@
-// Paste your published Google Sheets CSV URL inside the quotes below:
+// Paste your published Google Sheets CSV URL between the single quotes below:
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9Xl8OLV8KSgH5XrxPZN0v_t3rSUq8y1_zuYOqabT-ND_L9SvTMBcwBB0GMPhj2iNH0cqQTZ5YkC3J/pub?gid=1038942149&single=true&output=csv';
 
-let spreadsheetData = [];
+let currentData = [];
 
-// Fetch data from the Google Sheet CSV link
-function fetchSheetData() {
+// Fetch and parse the data from Google Sheets
+function loadData() {
     Papa.parse(SHEET_CSV_URL, {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            spreadsheetData = results.data;
-            populateDropdowns(spreadsheetData);
-            displayTable(spreadsheetData);
+            currentData = results.data;
+            setupDropdowns(currentData);
+            renderTable(currentData);
         },
         error: function(err) {
-            console.error("Error parsing CSV data: ", err);
+            console.error("Error loading spreadsheet data:", err);
         }
     });
 }
 
-// Dynamically fill the dropdown filters with unique options from your sheet
-function populateDropdowns(data) {
+// Dynamically fill the dropdown filters with unique values from your sheet
+function setupDropdowns(data) {
     const programSelect = document.getElementById('program-select');
     const modeSelect = document.getElementById('mode-select');
-
-    // Keep only the default "All" options initially
+    
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
 
-    const uniquePrograms = new Set();
-    const uniqueModes = new Set();
+    const programs = new Set();
+    const modes = new Set();
 
     data.forEach(row => {
-        if (row['Programme Title']) uniquePrograms.add(row['Programme Title'].trim());
-        if (row['Mode of training']) uniqueModes.add(row['Mode of training'].trim());
+        if (row['Programme Title']) programs.add(row['Programme Title'].trim());
+        if (row['Mode of training']) modes.add(row['Mode of training'].trim());
     });
 
-    // Add sorted options to dropdowns
-    Array.from(uniquePrograms).sort().forEach(prog => {
-        programSelect.add(new Option(prog, prog));
-    });
-    Array.from(uniqueModes).sort().forEach(mode => {
-        modeSelect.add(new Option(mode, mode));
-    });
+    programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
+    modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
 }
 
-// Generate and display the table records
-function displayTable(data) {
+// Display the data inside the HTML table
+function renderTable(data) {
     const headersRow = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
-
+    
     headersRow.innerHTML = '';
     tableBody.innerHTML = '';
 
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No training schedules found matching these filters.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No training records found matching those filters.</td></tr>';
         return;
     }
 
-    // Build Table Headers from your columns
-    const headers = Object.keys(data[0]);
+    // Use your exact column list for the table headers
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    
     headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
         headersRow.appendChild(th);
     });
 
-    // Build Table Rows
+    // Populate data rows
     data.forEach(row => {
         const tr = document.createElement('tr');
         headers.forEach(header => {
             const td = document.createElement('td');
-            td.textContent = row[header] || '';
+            // If it's the link column and contains a URL, make it clickable
+            if (header === 'Link' && row[header] && row[header].startsWith('http')) {
+                td.innerHTML = `<a href="${row[header]}" target="_blank">View Link</a>`;
+            } else {
+                td.textContent = row[header] || '';
+            }
             tr.appendChild(td);
         });
         tableBody.appendChild(tr);
     });
 }
 
-// Filter the table records when a dropdown selection changes
-function applyFilters() {
-    const selectedProgram = document.getElementById('program-select').value;
-    const selectedMode = document.getElementById('mode-select').value;
+// Filter data when a user changes a dropdown selection
+function filterData() {
+    const programFilter = document.getElementById('program-select').value;
+    const modeFilter = document.getElementById('mode-select').value;
 
-    const filteredData = spreadsheetData.filter(row => {
-        const matchesProgram = selectedProgram === 'all' || row['Programme Title']?.trim() === selectedProgram;
-        const matchesMode = selectedMode === 'all' || row['Mode of training']?.trim() === selectedMode;
+    const filtered = currentData.filter(row => {
+        const matchesProgram = programFilter === 'all' || row['Programme Title']?.trim() === programFilter;
+        const matchesMode = modeFilter === 'all' || row['Mode of training']?.trim() === modeFilter;
         return matchesProgram && matchesMode;
     });
 
-    displayTable(filteredData);
+    renderTable(filtered);
 }
 
-// Event Listeners for Dropdowns
-document.getElementById('program-select').addEventListener('change', applyFilters);
-document.getElementById('mode-select').addEventListener('change', applyFilters);
+// Listen for dropdown changes
+document.getElementById('program-select').addEventListener('change', filterData);
+document.getElementById('mode-select').addEventListener('change', filterData);
 
-// Run the script as soon as the page loads
-window.addEventListener('DOMContentLoaded', fetchSheetData);
+// Load data immediately when page opens
+window.addEventListener('DOMContentLoaded', loadData);
