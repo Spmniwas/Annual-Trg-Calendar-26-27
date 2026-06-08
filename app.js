@@ -35,7 +35,7 @@ function setupDropdowns(data) {
     const statuses = new Set();
 
     data.forEach(row => {
-        if (row['Programme Title']) programs.add(row['Programme Title'].trim());
+        if (row['Program Name']) programs.add(row['Program Name'].trim());
         if (row['Mode of training']) modes.add(row['Mode of training'].trim());
         if (row['Status']) statuses.add(row['Status'].trim());
     });
@@ -59,7 +59,7 @@ function renderTable(data) {
     }
 
     // Use your exact column list for the table headers
-    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Course Title', 'Mode of training', 'Location', 'Status', 'Link'];
     
     headers.forEach(header => {
         const th = document.createElement('th');
@@ -91,7 +91,7 @@ function filterData() {
     const statusFilter = document.getElementById('status-select').value;
 
     const filtered = currentData.filter(row => {
-        const matchesProgram = programFilter === 'all' || row['Programme Title']?.trim() === programFilter;
+        const matchesProgram = programFilter === 'all' || row['Programme Name']?.trim() === programFilter;
         const matchesMode = modeFilter === 'all' || row['Mode of training']?.trim() === modeFilter;
         const matchesStatus = statusFilter === 'all' || row['Status']?.trim() === statusFilter;
         return matchesProgram && matchesMode && matchesStatus;
