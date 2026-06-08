@@ -24,20 +24,25 @@ function loadData() {
 function setupDropdowns(data) {
     const programSelect = document.getElementById('program-select');
     const modeSelect = document.getElementById('mode-select');
+    const statusSelect = document.getElementById('status-select');
     
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
+    statusSelect.innerHTML = '<option value="all">All Statuses</option>';
 
     const programs = new Set();
     const modes = new Set();
+    const statuses = new Set();
 
     data.forEach(row => {
         if (row['Programme Title']) programs.add(row['Programme Title'].trim());
         if (row['Mode of training']) modes.add(row['Mode of training'].trim());
+        if (row['Status']) statuses.add(row['Status'].trim());
     });
 
     programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
+    statuses.forEach(s => { if(s) statusSelect.add(new Option(s, s)); });
 }
 
 // Display the data inside the HTML table
@@ -79,15 +84,17 @@ function renderTable(data) {
     });
 }
 
-// Filter data when a user changes a dropdown selection
+// Filter data when a user changes any dropdown selection
 function filterData() {
     const programFilter = document.getElementById('program-select').value;
     const modeFilter = document.getElementById('mode-select').value;
+    const statusFilter = document.getElementById('status-select').value;
 
     const filtered = currentData.filter(row => {
         const matchesProgram = programFilter === 'all' || row['Programme Title']?.trim() === programFilter;
         const matchesMode = modeFilter === 'all' || row['Mode of training']?.trim() === modeFilter;
-        return matchesProgram && matchesMode;
+        const matchesStatus = statusFilter === 'all' || row['Status']?.trim() === statusFilter;
+        return matchesProgram && matchesMode && matchesStatus;
     });
 
     renderTable(filtered);
@@ -96,6 +103,7 @@ function filterData() {
 // Listen for dropdown changes
 document.getElementById('program-select').addEventListener('change', filterData);
 document.getElementById('mode-select').addEventListener('change', filterData);
+document.getElementById('status-select').addEventListener('change', filterData);
 
 // Load data immediately when page opens
 window.addEventListener('DOMContentLoaded', loadData);
