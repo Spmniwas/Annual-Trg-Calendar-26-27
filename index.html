@@ -3,31 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPM Niwas Training Calendar Dashboard</title>
+    <title>SPM NIWAS Training Calendar 2026-27</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body>
 
     <header>
-        <h1>SPM Niwas Annual Training Calendar</h1>
+        <h1>SPM NIWAS Annual Training Calendar</h1>
         <p>Interactive Dashboard</p>
     </header>
 
     <main>
-        <section style="margin-bottom: 20px;">
-                <label for="program-select" style="margin-left: 15px;">Program Name: </label>
-            <select id="program-select">
-                <option value="all">All Programs</option>
-            </select>
+        <section class="filter-container">
+            <div class="filter-group">
+                <label for="program-select">Program Name</label>
+                <select id="program-select">
+                    <option value="all">All Programs</option>
+                </select>
+            </div>
 
-            <label for="mode-select" style="margin-left: 15px;">Mode of Delivery: </label>
-            <select id="mode-select">
-                <option value="all">All Modes</option>
-            </select>
+            <div class="filter-group">
+                <label for="mode-select">Mode of Delivery</label>
+                <select id="mode-select">
+                    <option value="all">All Modes</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="status-select">Status</label>
+                <select id="status-select">
+                    <option value="all">All Statuses</option>
+                </select>
+            </div>
         </section>
 
-        <section>
-            <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+        <section class="table-container">
+            <table id="calendar-table">
                 <thead>
                     <tr id="table-headers">
                         </tr>
