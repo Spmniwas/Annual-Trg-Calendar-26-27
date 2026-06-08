@@ -89,7 +89,15 @@ table {
 th, td {
     padding: 12px 15px;
     border-bottom: 1px solid #eaeaea;
-    white-space: nowrap; /* Keeps your rows compact and cleanly aligned */
+    white-space: normal; /* Allows text to wrap into multiple lines */
+    word-break: break-word; /* Ensures long words break cleanly */
+}
+
+/* Give the long text columns a comfortable width limit */
+th:nth-child(2), td:nth-child(2),
+th:nth-child(8), td:nth-child(8) {
+    min-width: 200px;
+    max-width: 300px;
 }
 
 th {
