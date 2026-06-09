@@ -4,6 +4,7 @@ const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9Xl8OLV
 let currentData = [];
 
 // Fetch and parse the data from Google Sheets
+// Fetch and parse the data from Google Sheets
 function loadData() {
     Papa.parse(SHEET_CSV_URL, {
         download: true,
@@ -12,7 +13,7 @@ function loadData() {
         complete: function(results) {
             currentData = results.data;
             setupDropdowns(currentData);
-            renderTable(currentData);
+            filterData(); // Changed from renderTable(currentData) to apply default filters on load
         },
         error: function(err) {
             console.error("Error loading spreadsheet data:", err);
@@ -42,7 +43,10 @@ function setupDropdowns(data) {
 
     programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
-    statuses.forEach(s => { if(s) statusSelect.add(new Option(s, s)); });
+    statuses.forEach(s => { 
+        // Skip adding "Upcoming" again since it's already coded into the HTML default
+        if(s && s !== 'Upcoming') statusSelect.add(new Option(s, s)); 
+    });
 }
 
 // Display the data inside the HTML table
