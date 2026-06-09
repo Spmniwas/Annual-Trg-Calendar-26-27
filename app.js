@@ -63,7 +63,7 @@ function renderTable(data) {
     }
 
     // Standard headers displayed on the dashboard layout
-    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Course Title', 'Mode of training', 'Location', 'Status', 'Link'];
     
     headers.forEach(header => {
         const th = document.createElement('th');
