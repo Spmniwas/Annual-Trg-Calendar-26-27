@@ -96,15 +96,16 @@ function renderTable(data) {
 }
 
 // Filter data when a user changes any dropdown selection
+// Filter data when a user changes any dropdown selection
 function filterData() {
-    const programFilter = document.getElementById('program-select').value.trim();
-    const modeFilter = document.getElementById('mode-select').value.trim();
-    const statusFilter = document.getElementById('status-select').value.trim();
+    const programFilter = document.getElementById('program-select').value.trim().toLowerCase();
+    const modeFilter = document.getElementById('mode-select').value.trim().toLowerCase();
+    const statusFilter = document.getElementById('status-select').value.trim().toLowerCase();
 
     const filtered = currentData.filter(row => {
-        const rowProgram = row['Program Name'] ? row['Program Name'].trim() : '';
-        const rowMode = row['Mode of training'] ? row['Mode of training'].trim() : '';
-        const rowStatus = row['Status'] ? row['Status'].trim() : '';
+        const rowProgram = row['Program Name'] ? row['Program Name'].trim().toLowerCase() : '';
+        const rowMode = row['Mode of training'] ? row['Mode of training'].trim().toLowerCase() : '';
+        const rowStatus = row['Status'] ? row['Status'].trim().toLowerCase() : '';
 
         const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
         const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
