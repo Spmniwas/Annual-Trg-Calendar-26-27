@@ -73,7 +73,6 @@ function filterData() {
 }
 
 // Display the sliced 50-row data chunk inside the HTML table
-// Display the sliced 50-row data chunk inside the HTML table
 function renderTablePage() {
     const headersRow = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
@@ -98,10 +97,10 @@ function renderTablePage() {
         return;
     }
 
-    // Standard headers displayed visually on the dashboard layout
-    const displayHeaders = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    // Standard headers displayed on the dashboard layout
+    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
     
-    displayHeaders.forEach(header => {
+    headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
         headersRow.appendChild(th);
@@ -115,18 +114,10 @@ function renderTablePage() {
     // Populate data rows for the 50 items allocated to this page
     pageDataChunk.forEach(row => {
         const tr = document.createElement('tr');
-        displayHeaders.forEach(header => {
+        headers.forEach(header => {
             const td = document.createElement('td');
             
-            // Map the visual header name to the exact keys used in your Google Sheet
-            let sheetKey = header;
-            if (header === 'Programme Title') {
-                sheetKey = 'Course Title'; // Maps dashboard layout to sheet column name
-            }
-
-            let cellValue = row[sheetKey];
-            
-            // Smart fallback for the 'From' column in case of hidden trailing spaces
+            let cellValue = row[header];
             if (header === 'From' && !cellValue) {
                 cellValue = row['From '] || row['from'] || '';
             }
@@ -140,7 +131,6 @@ function renderTablePage() {
         });
         tableBody.appendChild(tr);
     });
-}
 }
 
 // Listen for pagination navigation button click events
