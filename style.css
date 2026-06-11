@@ -93,7 +93,7 @@ th, td {
     word-break: break-word; /* Ensures long words break cleanly */
 }
 
-/* Give the long text columns a comfortable width limit */
+/* Give the long text columns (Program Name & Programme Title) a comfortable width limit */
 th:nth-child(2), td:nth-child(2),
 th:nth-child(8), td:nth-child(8) {
     min-width: 200px;
@@ -126,4 +126,16 @@ td a {
 td a:hover {
     background: #0056b3;
     color: white;
+}
+
+/* Pagination buttons hover states */
+#prev-btn:hover:not(:disabled), #next-btn:hover:not(:disabled) {
+    background-color: #f0f4f8 !important;
+    border-color: #0056b3 !important;
+    color: #0056b3;
+}
+
+#prev-btn:disabled, #next-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
