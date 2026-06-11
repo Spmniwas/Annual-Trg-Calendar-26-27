@@ -32,6 +32,9 @@ function setupDropdowns(data) {
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
     statusSelect.innerHTML = '<option value="all">All Statuses</option>';
+    
+    // Explicitly seed 'Upcoming' since it's our chosen HTML default option
+    statusSelect.innerHTML += '<option value="Upcoming">Upcoming</option>';
 
     const programs = new Set();
     const modes = new Set();
@@ -46,8 +49,12 @@ function setupDropdowns(data) {
     programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
     statuses.forEach(s => { 
-        if(s && s !== 'Upcoming') statusSelect.add(new Option(s, s)); 
+        // Prevent duplicate injection tracking for our standalone default value
+        if(s && s.toLowerCase() !== 'upcoming') statusSelect.add(new Option(s, s)); 
     });
+    
+    // Set matching visual active value on the generated selector layout box
+    statusSelect.value = "Upcoming";
 }
 
 // Filter data when a user changes any dropdown selection
@@ -83,30 +90,28 @@ function renderTablePage() {
     const totalRecords = filteredData.length;
     const totalPages = Math.ceil(totalRecords / ROWS_PER_PAGE) || 1;
 
-    // Boundary protection for page indexes
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
 
-    // Update Pagination UI text info details
+    // Update Pagination UI indicators
     document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages} (${totalRecords} items)`;
     document.getElementById('prev-btn').disabled = currentPage === 1;
     document.getElementById('next-btn').disabled = currentPage === totalPages;
 
     if (totalRecords === 0) {
-        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No training records found matching those filters.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 30px;">No training records found matching those filters.</td></tr>';
         return;
     }
 
-    // Standard headers displayed on the dashboard layout
-    const headers = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    // Display Headers on the UI Layout
+    const displayHeaders = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
     
-    headers.forEach(header => {
+    displayHeaders.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
         headersRow.appendChild(th);
     });
 
-    // Calculate math tracking start and end arrays points for 50-row breaks
     const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
     const endIndex = startIndex + ROWS_PER_PAGE;
     const pageDataChunk = filteredData.slice(startIndex, endIndex);
@@ -114,10 +119,18 @@ function renderTablePage() {
     // Populate data rows for the 50 items allocated to this page
     pageDataChunk.forEach(row => {
         const tr = document.createElement('tr');
-        headers.forEach(header => {
+        displayHeaders.forEach(header => {
             const td = document.createElement('td');
             
-            let cellValue = row[header];
+            // Core mapping bridge: Convert user header request to raw Google Sheet property
+            let sheetKey = header;
+            if (header === 'Programme Title') {
+                sheetKey = 'Course Title'; 
+            }
+
+            let cellValue = row[sheetKey];
+            
+            // Smart fallback loop for the 'From' column spaces issue
             if (header === 'From' && !cellValue) {
                 cellValue = row['From '] || row['from'] || '';
             }
@@ -138,7 +151,7 @@ document.getElementById('prev-btn').addEventListener('click', () => {
     if (currentPage > 1) {
         currentPage--;
         renderTablePage();
-        document.querySelector('.table-container').scrollTop = 0; // Scroll back up smoothly
+        document.querySelector('.table-container').scrollLeft = 0; // Reset scroll view back to start
     }
 });
 
@@ -147,7 +160,7 @@ document.getElementById('next-btn').addEventListener('click', () => {
     if (currentPage < totalPages) {
         currentPage++;
         renderTablePage();
-        document.querySelector('.table-container').scrollTop = 0; // Scroll back up smoothly
+        document.querySelector('.table-container').scrollLeft = 0; // Reset scroll view back to start
     }
 });
 
