@@ -124,7 +124,7 @@ function renderTablePage() {
         displayHeaders.forEach(header => {
             const td = document.createElement('td');
             
-            // Map our visual header text to your spreadsheet's exact column key
+            // Core mapping bridge: Convert user header request to raw Google Sheet property
             let sheetKey = header;
             if (header === 'Programme Title') {
                 sheetKey = 'Course Title'; 
@@ -132,13 +132,14 @@ function renderTablePage() {
 
             let cellValue = row[sheetKey];
             
-            // Smart fallback check for the 'From' column trailing space
+            // Smart fallback loop for the 'From' column spaces issue
             if (header === 'From' && !cellValue) {
                 cellValue = row['From '] || row['from'] || '';
             }
 
+            // Custom link rendering for Google Sheets nomination forms
             if (header === 'Link' && cellValue && cellValue.trim().startsWith('http')) {
-                td.innerHTML = `<a href="${cellValue.trim()}" target="_blank">View Link</a>`;
+                td.innerHTML = `<a href="${cellValue.trim()}" target="_blank">Submit Nomination</a>`;
             } else {
                 td.textContent = cellValue ? cellValue.trim() : '';
             }
