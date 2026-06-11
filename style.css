@@ -70,13 +70,15 @@ select:focus {
     border-color: #0056b3;
 }
 
-/* Table container styling to allow responsive horizontal scrolling */
+/* Fixed Table container height to make the floating headers work perfectly */
 .table-container {
     background: white;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     overflow-x: auto; 
+    overflow-y: auto;
+    max-height: 650px; /* Limits table height so headers lock at the top when scrolling down */
 }
 
 table {
@@ -93,19 +95,29 @@ th, td {
     word-break: break-word; /* Ensures long words break cleanly */
 }
 
-/* Give the long text columns (Program Name & Programme Title) a comfortable width limit */
-th:nth-child(2), td:nth-child(2),
-th:nth-child(8), td:nth-child(8) {
-    min-width: 200px;
-    max-width: 300px;
-}
-
+/* Sticky floating headers configuration */
 th {
     background-color: #f8f9fa;
     color: #495057;
     font-weight: 600;
     position: sticky;
-    top: 0;
+    top: -16px; /* Offsets padding inside table container container */
+    z-index: 10; /* Keeps headers floating strictly on top of text rows */
+    box-shadow: inset 0 -1px 0 #eaeaea; /* Keeps a clean bottom border while floating */
+}
+
+/* EXACT COLUMN WIDTH CONTROLS */
+
+/* Column 2: Program Name (SBM, JJM, etc.) - Made compact as requested */
+th:nth-child(2), td:nth-child(2) {
+    min-width: 80px;
+    max-width: 110px;
+}
+
+/* Column 8: Programme Title (Long descriptions) - Left comfortable & wide */
+th:nth-child(8), td:nth-child(8) {
+    min-width: 250px;
+    max-width: 400px;
 }
 
 tr:hover {
