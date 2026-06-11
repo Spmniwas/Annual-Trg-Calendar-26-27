@@ -32,13 +32,13 @@ function setupDropdowns(data) {
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
     statusSelect.innerHTML = '<option value="all">All Statuses</option>';
-    
-    // Explicitly seed 'Upcoming' since it's our chosen HTML default option
-    statusSelect.innerHTML += '<option value="Upcoming">Upcoming</option>';
 
     const programs = new Set();
     const modes = new Set();
     const statuses = new Set();
+
+    // Ensure 'Upcoming' is explicitly available in the set right away
+    statuses.add('Upcoming');
 
     data.forEach(row => {
         if (row['Program Name']) programs.add(row['Program Name'].trim());
@@ -48,13 +48,15 @@ function setupDropdowns(data) {
 
     programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
-    statuses.forEach(s => { 
-        // Prevent duplicate injection tracking for our standalone default value
-        if(s && s.toLowerCase() !== 'upcoming') statusSelect.add(new Option(s, s)); 
-    });
     
-    // Set matching visual active value on the generated selector layout box
-    statusSelect.value = "Upcoming";
+    // Sort and add statuses, setting 'Upcoming' as the selected default
+    statuses.forEach(s => { 
+        if(s) {
+            const isUpcoming = s.toLowerCase() === 'upcoming';
+            const option = new Option(s, s, isUpcoming, isUpcoming);
+            statusSelect.add(option);
+        }
+    });
 }
 
 // Filter data when a user changes any dropdown selection
@@ -122,7 +124,7 @@ function renderTablePage() {
         displayHeaders.forEach(header => {
             const td = document.createElement('td');
             
-            // Core mapping bridge: Convert user header request to raw Google Sheet property
+            // Map our visual header text to your spreadsheet's exact column key
             let sheetKey = header;
             if (header === 'Programme Title') {
                 sheetKey = 'Course Title'; 
@@ -130,7 +132,7 @@ function renderTablePage() {
 
             let cellValue = row[sheetKey];
             
-            // Smart fallback loop for the 'From' column spaces issue
+            // Smart fallback check for the 'From' column trailing space
             if (header === 'From' && !cellValue) {
                 cellValue = row['From '] || row['from'] || '';
             }
@@ -151,7 +153,7 @@ document.getElementById('prev-btn').addEventListener('click', () => {
     if (currentPage > 1) {
         currentPage--;
         renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; // Reset scroll view back to start
+        document.querySelector('.table-container').scrollLeft = 0; 
     }
 });
 
@@ -160,7 +162,7 @@ document.getElementById('next-btn').addEventListener('click', () => {
     if (currentPage < totalPages) {
         currentPage++;
         renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; // Reset scroll view back to start
+        document.querySelector('.table-container').scrollLeft = 0; 
     }
 });
 
