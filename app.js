@@ -59,27 +59,65 @@ function setupDropdowns(data) {
     });
 }
 
-// Filter data when a user changes any dropdown selection
+// Filter data when a user changes any dropdown selection or types a keyword
 function filterData() {
     const programFilter = document.getElementById('program-select').value.trim().toLowerCase();
     const modeFilter = document.getElementById('mode-select').value.trim().toLowerCase();
     const statusFilter = document.getElementById('status-select').value.trim().toLowerCase();
+    const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
 
     filteredData = currentData.filter(row => {
         const rowProgram = row['Program Name'] ? row['Program Name'].trim().toLowerCase() : '';
         const rowMode = row['Mode of training'] ? row['Mode of training'].trim().toLowerCase() : '';
         const rowStatus = row['Status'] ? row['Status'].trim().toLowerCase() : '';
 
+        // Dropdown matching logic
         const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
         const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
         const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
 
-        return matchesProgram && matchesMode && matchesStatus;
+        // Global keyword search logic: converts the entire row's values to text and checks for the query
+        let matchesSearch = true;
+        if (searchQuery) {
+            const combinedRowText = Object.values(row).join(' ').toLowerCase();
+            matchesSearch = combinedRowText.includes(searchQuery);
+        }
+
+        return matchesProgram && matchesMode && matchesStatus && matchesSearch;
     });
 
     currentPage = 1; // Reset to page 1 whenever filters change
     renderTablePage();
 }
+
+// Listen for pagination navigation button click events
+document.getElementById('prev-btn').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTablePage();
+        document.querySelector('.table-container').scrollLeft = 0; 
+    }
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredData.length / ROWS_PER_PAGE);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTablePage();
+        document.querySelector('.table-container').scrollLeft = 0; 
+    }
+});
+
+// Listen for filter dropdown configuration changes
+document.getElementById('program-select').addEventListener('change', filterData);
+document.getElementById('mode-select').addEventListener('change', filterData);
+document.getElementById('status-select').addEventListener('change', filterData);
+
+// Listen for text input inside the global search bar (updates instantly on keyup)
+document.getElementById('search-input').addEventListener('input', filterData);
+
+// Load data immediately when page opens
+window.addEventListener('DOMContentLoaded', loadData);
 
 // Display the sliced 50-row data chunk inside the HTML table
 function renderTablePage() {
