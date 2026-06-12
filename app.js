@@ -37,7 +37,6 @@ function setupDropdowns(data) {
     const modes = new Set();
     const statuses = new Set();
 
-    // Ensure 'Upcoming' is explicitly available in the set right away
     statuses.add('Upcoming');
 
     data.forEach(row => {
@@ -49,7 +48,6 @@ function setupDropdowns(data) {
     programs.forEach(p => { if(p) programSelect.add(new Option(p, p)); });
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
     
-    // Sort and add statuses, setting 'Upcoming' as the selected default
     statuses.forEach(s => { 
         if(s) {
             const isUpcoming = s.toLowerCase() === 'upcoming';
@@ -71,55 +69,29 @@ function filterData() {
         const rowMode = row['Mode of training'] ? row['Mode of training'].trim().toLowerCase() : '';
         const rowStatus = row['Status'] ? row['Status'].trim().toLowerCase() : '';
 
-        // Dropdown matching logic
         const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
         const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
         const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
 
-        // Global keyword search logic: converts the entire row's values to text and checks for the query
         let matchesSearch = true;
         if (searchQuery) {
-            const combinedRowText = Object.values(row).join(' ').toLowerCase();
-            matchesSearch = combinedRowText.includes(searchQuery);
+            const rowTitle = row['Course Title'] ? row['Course Title'].trim().toLowerCase() : '';
+            const rowCode = row['Course code'] ? row['Course code'].trim().toLowerCase() : '';
+            const rowLocation = row['Location'] ? row['Location'].trim().toLowerCase() : '';
+            const rowBatch = row['Batch'] ? row['Batch'].trim().toLowerCase() : '';
+
+            const combinedFields = `${rowProgram} ${rowMode} ${rowStatus} ${rowTitle} ${rowCode} ${rowLocation} ${rowBatch}`;
+            matchesSearch = combinedFields.includes(searchQuery);
         }
 
         return matchesProgram && matchesMode && matchesStatus && matchesSearch;
     });
 
-    currentPage = 1; // Reset to page 1 whenever filters change
+    currentPage = 1; 
     renderTablePage();
 }
 
-// Listen for pagination navigation button click events
-document.getElementById('prev-btn').addEventListener('click', () => {
-    if (currentPage > 1) {
-        currentPage--;
-        renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; 
-    }
-});
-
-document.getElementById('next-btn').addEventListener('click', () => {
-    const totalPages = Math.ceil(filteredData.length / ROWS_PER_PAGE);
-    if (currentPage < totalPages) {
-        currentPage++;
-        renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; 
-    }
-});
-
-// Listen for filter dropdown configuration changes
-document.getElementById('program-select').addEventListener('change', filterData);
-document.getElementById('mode-select').addEventListener('change', filterData);
-document.getElementById('status-select').addEventListener('change', filterData);
-
-// Listen for text input inside the global search bar (updates instantly on keyup)
-document.getElementById('search-input').addEventListener('input', filterData);
-
-// Load data immediately when page opens
-window.addEventListener('DOMContentLoaded', loadData);
-
-// Display the sliced 50-row data chunk inside the HTML table
+// Display the streamlined table layout
 function renderTablePage() {
     const headersRow = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
@@ -133,18 +105,17 @@ function renderTablePage() {
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
 
-    // Update Pagination UI indicators
     document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages} (${totalRecords} items)`;
     document.getElementById('prev-btn').disabled = currentPage === 1;
     document.getElementById('next-btn').disabled = currentPage === totalPages;
 
     if (totalRecords === 0) {
-        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 30px;">No training records found matching those filters.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px;">No training records found matching those filters.</td></tr>';
         return;
     }
 
-    // Display Headers on the UI Layout
-    const displayHeaders = ['Sr. No.', 'Program Name', 'From', 'To', 'Duration', 'Course code', 'Batch', 'Programme Title', 'Mode of training', 'Location', 'Status', 'Link'];
+    // New optimized 7-column layout layout list
+    const displayHeaders = ['Sr. No.', 'Programme Title', 'From', 'To', 'Location', 'Status', 'Link'];
     
     displayHeaders.forEach(header => {
         const th = document.createElement('th');
@@ -156,31 +127,55 @@ function renderTablePage() {
     const endIndex = startIndex + ROWS_PER_PAGE;
     const pageDataChunk = filteredData.slice(startIndex, endIndex);
 
-    // Populate data rows for the 50 items allocated to this page
     pageDataChunk.forEach(row => {
         const tr = document.createElement('tr');
         displayHeaders.forEach(header => {
             const td = document.createElement('td');
             
-            // Core mapping bridge: Convert user header request to raw Google Sheet property
-            let sheetKey = header;
             if (header === 'Programme Title') {
-                sheetKey = 'Course Title'; 
-            }
+                // Pull data points dynamically from row properties
+                const titleText = row['Course Title'] ? row['Course Title'].trim() : '';
+                const progName = row['Program Name'] ? row['Program Name'].trim() : '';
+                const modeText = row['Mode of training'] ? row['Mode of training'].trim() : '';
+                const durationText = row['Duration'] ? row['Duration'].trim() : '';
+                const codeText = row['Course code'] ? row['Course code'].trim() : '';
+                const batchText = row['Batch'] ? row['Batch'].trim() : '';
 
-            let cellValue = row[sheetKey];
-            
-            // Smart fallback loop for the 'From' column spaces issue
-            if (header === 'From' && !cellValue) {
-                cellValue = row['From '] || row['from'] || '';
-            }
+                // Assign conditional background coloring states for program tags
+                let badgeClass = 'badge-default';
+                if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
+                if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
 
-            // Custom link rendering for Google Sheets nomination forms
-            if (header === 'Link' && cellValue && cellValue.trim().startsWith('http')) {
-                td.innerHTML = `<a href="${cellValue.trim()}" target="_blank">Submit Nomination</a>`;
-            } else {
+                // Assemble the dual-layered card design layout
+                td.innerHTML = `
+                    <div class="title-main">${titleText}</div>
+                    <div class="metadata-row">
+                        <span class="meta-badge ${badgeClass}">🏷️ ${progName}</span>
+                        <span class="meta-item">💻 ${modeText}</span>
+                        <span class="meta-item">⏱️ ${durationText}</span>
+                        <span class="meta-item">🔑 ${codeText}</span>
+                        <span class="meta-item">👥 ${batchText}</span>
+                    </div>
+                `;
+            } 
+            else if (header === 'From') {
+                let cellValue = row['From'] || row['From '] || row['from'] || '';
+                td.textContent = cellValue ? cellValue.trim() : '';
+            } 
+            else if (header === 'Link') {
+                let cellValue = row['Link'] ? row['Link'].trim() : '';
+                if (cellValue && cellValue.startsWith('http')) {
+                    td.innerHTML = `<a href="${cellValue}" target="_blank">Submit Nomination</a>`;
+                } else {
+                    td.textContent = '';
+                }
+            } 
+            else {
+                // Handles standard mappings for To, Location, Status, and Sr. No.
+                let cellValue = row[header];
                 td.textContent = cellValue ? cellValue.trim() : '';
             }
+            
             tr.appendChild(td);
         });
         tableBody.appendChild(tr);
@@ -192,7 +187,7 @@ document.getElementById('prev-btn').addEventListener('click', () => {
     if (currentPage > 1) {
         currentPage--;
         renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; 
+        document.querySelector('.table-container').scrollTop = 0; 
     }
 });
 
@@ -201,14 +196,13 @@ document.getElementById('next-btn').addEventListener('click', () => {
     if (currentPage < totalPages) {
         currentPage++;
         renderTablePage();
-        document.querySelector('.table-container').scrollLeft = 0; 
+        document.querySelector('.table-container').scrollTop = 0; 
     }
 });
 
-// Listen for filter dropdown configuration changes
 document.getElementById('program-select').addEventListener('change', filterData);
 document.getElementById('mode-select').addEventListener('change', filterData);
 document.getElementById('status-select').addEventListener('change', filterData);
+document.getElementById('search-input').addEventListener('input', filterData);
 
-// Load data immediately when page opens
 window.addEventListener('DOMContentLoaded', loadData);
