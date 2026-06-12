@@ -55,7 +55,7 @@ header p {
     color: #555;
 }
 
-select {
+select, input[type="text"] {
     padding: 10px 14px;
     border-radius: 6px;
     border: 1px solid #ccc;
@@ -63,6 +63,12 @@ select {
     font-size: 14px;
     background-color: #fff;
     cursor: pointer;
+    box-sizing: border-box;
+}
+
+input[type="text"] {
+    width: 100%;
+    cursor: text;
 }
 
 select:focus, input:focus {
@@ -78,7 +84,7 @@ select:focus, input:focus {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     overflow-x: auto; 
     overflow-y: auto;
-    max-height: 650px; /* Limits table height so headers lock at the top when scrolling down */
+    max-height: 650px; /* Limits table height so headers lock at the top when scrolling */
 }
 
 table {
@@ -91,8 +97,7 @@ table {
 th, td {
     padding: 12px 15px;
     border-bottom: 1px solid #eaeaea;
-    white-space: normal; /* Allows text to wrap into multiple lines */
-    word-break: break-word; /* Ensures long words break cleanly */
+    vertical-align: top;
 }
 
 /* Sticky floating headers configuration */
@@ -101,23 +106,65 @@ th {
     color: #495057;
     font-weight: 600;
     position: sticky;
-    top: -16px; /* Offsets padding inside table container container */
-    z-index: 10; /* Keeps headers floating strictly on top of text rows */
-    box-shadow: inset 0 -1px 0 #eaeaea; /* Keeps a clean bottom border while floating */
+    top: -16px; 
+    z-index: 10; 
+    box-shadow: inset 0 -1px 0 #eaeaea; 
 }
 
-/* EXACT COLUMN WIDTH CONTROLS */
+/* Title Card Interior Styling Layout rules */
+.title-main {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    white-space: normal;
+    word-break: break-word;
+}
 
-/* Column 2: Program Name (SBM, JJM, etc.) - Made compact as requested */
+.metadata-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Inline Metadata Elements */
+.meta-item {
+    background-color: #f1f3f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Program Specific Custom Background Badges */
+.meta-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.badge-jjm {
+    background-color: #e3f2fd; /* Light Blue */
+    color: #0d47a1;
+}
+
+.badge-sbm {
+    background-color: #e8f5e9; /* Light Green */
+    color: #1b5e20;
+}
+
+.badge-default {
+    background-color: #e9ecef; /* Light Gray for other entries */
+    color: #495057;
+}
+
+/* Restrict the width of the main title block cell nicely */
 th:nth-child(2), td:nth-child(2) {
-    min-width: 80px;
-    max-width: 110px;
-}
-
-/* Column 8: Programme Title (Long descriptions) - Left comfortable & wide */
-th:nth-child(8), td:nth-child(8) {
-    min-width: 250px;
-    max-width: 400px;
+    min-width: 300px;
+    max-width: 450px;
 }
 
 tr:hover {
@@ -130,9 +177,11 @@ td a {
     text-decoration: none;
     font-weight: 600;
     background: #e6effc;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 4px;
     font-size: 12px;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 td a:hover {
