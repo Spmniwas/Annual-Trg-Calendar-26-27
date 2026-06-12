@@ -65,7 +65,7 @@ select {
     cursor: pointer;
 }
 
-select:focus {
+select:focus, input:focus {
     outline: none;
     border-color: #0056b3;
 }
