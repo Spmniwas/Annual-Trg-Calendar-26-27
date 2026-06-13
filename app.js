@@ -105,6 +105,7 @@ function renderTablePage() {
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
     
+    // Displays clean page index descriptions without trailing text counters
     document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
     document.getElementById('prev-btn').disabled = currentPage === 1;
     document.getElementById('next-btn').disabled = currentPage === totalPages;
@@ -114,7 +115,7 @@ function renderTablePage() {
         return;
     }
 
-    // New optimized 7-column layout layout list
+    // New optimized 7-column layout list
     const displayHeaders = ['Sr. No.', 'Programme Title', 'From', 'To', 'Location', 'Status', 'Link'];
     
     displayHeaders.forEach(header => {
@@ -127,13 +128,13 @@ function renderTablePage() {
     const endIndex = startIndex + ROWS_PER_PAGE;
     const pageDataChunk = filteredData.slice(startIndex, endIndex);
 
-    pageDataChunk.forEach(row => {
+    // Using index tracking parameter directly inside the row execution chain
+    pageDataChunk.forEach((row, index) => {
         const tr = document.createElement('tr');
         displayHeaders.forEach(header => {
             const td = document.createElement('td');
             
             if (header === 'Programme Title') {
-                // Pull data points dynamically from row properties
                 const titleText = row['Course Title'] ? row['Course Title'].trim() : '';
                 const progName = row['Program Name'] ? row['Program Name'].trim() : '';
                 const modeText = row['Mode of training'] ? row['Mode of training'].trim() : '';
@@ -141,12 +142,10 @@ function renderTablePage() {
                 const codeText = row['Course code'] ? row['Course code'].trim() : '';
                 const batchText = row['Batch'] ? row['Batch'].trim() : '';
 
-                // Assign conditional background coloring states for program tags
                 let badgeClass = 'badge-default';
                 if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
                 if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
 
-                // Assemble the dual-layered card design layout
                 td.innerHTML = `
                     <div class="title-main">${titleText}</div>
                     <div class="metadata-row">
@@ -158,6 +157,10 @@ function renderTablePage() {
                     </div>
                 `;
             } 
+            else if (header === 'Sr. No.') {
+                // Dynamically computes running serialization numbers across filter page breaks smoothly
+                td.textContent = startIndex + index + 1;
+            }
             else if (header === 'From') {
                 let cellValue = row['From'] || row['From '] || row['from'] || '';
                 td.textContent = cellValue ? cellValue.trim() : '';
@@ -170,16 +173,10 @@ function renderTablePage() {
                     td.textContent = '';
                 }
             } 
-        else if (header === 'Sr. No.') {
-                // Dynamically calculate the count based on the current page index
-                const dynamicSerialNumber = startIndex + pageDataChunk.indexOf(row) + 1;
-                td.textContent = dynamicSerialNumber;
-            }
             else {
                 // Handles standard mappings for To, Location, and Status
                 let cellValue = row[header];
                 td.textContent = cellValue ? cellValue.trim() : '';
-            }
             }
             
             tr.appendChild(td);
