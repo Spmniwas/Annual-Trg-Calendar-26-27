@@ -170,10 +170,16 @@ function renderTablePage() {
                     td.textContent = '';
                 }
             } 
+        else if (header === 'Sr. No.') {
+                // Dynamically calculate the count based on the current page index
+                const dynamicSerialNumber = startIndex + pageDataChunk.indexOf(row) + 1;
+                td.textContent = dynamicSerialNumber;
+            }
             else {
-                // Handles standard mappings for To, Location, Status, and Sr. No.
+                // Handles standard mappings for To, Location, and Status
                 let cellValue = row[header];
                 td.textContent = cellValue ? cellValue.trim() : '';
+            }
             }
             
             tr.appendChild(td);
