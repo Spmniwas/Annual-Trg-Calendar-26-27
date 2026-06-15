@@ -93,13 +93,16 @@ function setupDropdowns(data) {
     
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
-    statusSelect.innerHTML = '<option value="all">All Statuses</option>';
+    
+    // Create a specific default option combining both active training categories
+    statusSelect.innerHTML = '<option value="active_default" selected>Active Trainings (In-progress & Upcoming)</option>';
+    statusSelect.innerHTML += '<option value="all">All Statuses</option>';
 
     const programs = new Set();
     const modes = new Set();
     const statuses = new Set();
 
-    // Ensure our essential system statuses are represented inside the filter options list
+    // Ensure our standard individual status categories are in the list options
     statuses.add('Upcoming');
     statuses.add('In-progress');
     statuses.add('Completed');
@@ -115,11 +118,13 @@ function setupDropdowns(data) {
     
     statuses.forEach(s => { 
         if(s) {
-            const isUpcoming = s.toLowerCase() === 'upcoming';
-            const option = new Option(s, s, isUpcoming, isUpcoming);
+            const option = new Option(s, s);
             statusSelect.add(option);
         }
     });
+    
+    // Enforce our combined active filter selection on visual layout box load
+    statusSelect.value = "active_default";
 }
 
 // Filter data when a user changes any dropdown selection or types a keyword
@@ -136,7 +141,17 @@ function filterData() {
 
         const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
         const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
-        const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
+        
+        // Advanced Status Filter Check: Matches individual choice OR our custom dual default
+        let matchesStatus = false;
+        if (statusFilter === 'all') {
+            matchesStatus = true;
+        } else if (statusFilter === 'active_default') {
+            // Allows BOTH 'in-progress' and 'upcoming' records to pass through initially
+            matchesStatus = (rowStatus === 'in-progress' || rowStatus === 'upcoming');
+        } else {
+            matchesStatus = rowStatus === statusFilter;
+        }
 
         let matchesSearch = true;
         if (searchQuery) {
@@ -170,7 +185,6 @@ function renderTablePage() {
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
     
-    // Displays clean page index descriptions without trailing text counters
     document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
     document.getElementById('prev-btn').disabled = currentPage === 1;
     document.getElementById('next-btn').disabled = currentPage === totalPages;
@@ -180,7 +194,6 @@ function renderTablePage() {
         return;
     }
 
-    // 7-column layout list
     const displayHeaders = ['Sr. No.', 'Programme Title', 'From', 'To', 'Location', 'Status', 'Link'];
     
     displayHeaders.forEach(header => {
@@ -195,83 +208,3 @@ function renderTablePage() {
 
     pageDataChunk.forEach((row, index) => {
         const tr = document.createElement('tr');
-        displayHeaders.forEach(header => {
-            const td = document.createElement('td');
-            
-            if (header === 'Programme Title') {
-                const titleText = row['Course Title'] ? row['Course Title'].trim() : '';
-                const progName = row['Program Name'] ? row['Program Name'].trim() : '';
-                const modeText = row['Mode of training'] ? row['Mode of training'].trim() : '';
-                const durationText = row['Duration'] ? row['Duration'].trim() : '';
-                const codeText = row['Course code'] ? row['Course code'].trim() : '';
-                const batchText = row['Batch'] ? row['Batch'].trim() : '';
-
-                let badgeClass = 'badge-default';
-                if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
-                if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
-
-                td.innerHTML = `
-                    <div class="title-main">${titleText}</div>
-                    <div class="metadata-row">
-                        <span class="meta-badge ${badgeClass}">🏷️ ${progName}</span>
-                        <span class="meta-item">💻 ${modeText}</span>
-                        <span class="meta-item">⏱️ ${durationText}</span>
-                        <span class="meta-item">🔑 ${codeText}</span>
-                        <span class="meta-item">👥 ${batchText}</span>
-                    </div>
-                `;
-            } 
-            else if (header === 'Sr. No.') {
-                // Dynamically computes running serialization numbers sequentially
-                td.textContent = startIndex + index + 1;
-            }
-            else if (header === 'From') {
-                let cellValue = row['From'] || row['From '] || row['from'] || '';
-                td.textContent = cellValue ? cellValue.trim() : '';
-            } 
-            else if (header === 'Status') {
-                td.textContent = row['CalculatedStatus'];
-            }
-            else if (header === 'Link') {
-                let cellValue = row['Link'] ? row['Link'].trim() : '';
-                if (cellValue && cellValue.startsWith('http')) {
-                    td.innerHTML = `<a href="${cellValue}" target="_blank">Submit Nomination</a>`;
-                } else {
-                    td.textContent = '';
-                }
-            } 
-            else {
-                let cellValue = row[header];
-                td.textContent = cellValue ? cellValue.trim() : '';
-            }
-            
-            tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-    });
-}
-
-// Listen for pagination navigation button click events
-document.getElementById('prev-btn').addEventListener('click', () => {
-    if (currentPage > 1) {
-        currentPage--;
-        renderTablePage();
-        document.querySelector('.table-container').scrollTop = 0; 
-    }
-});
-
-document.getElementById('next-btn').addEventListener('click', () => {
-    const totalPages = Math.ceil(filteredData.length / ROWS_PER_PAGE);
-    if (currentPage < totalPages) {
-        currentPage++;
-        renderTablePage();
-        document.querySelector('.table-container').scrollTop = 0; 
-    }
-});
-
-document.getElementById('program-select').addEventListener('change', filterData);
-document.getElementById('mode-select').addEventListener('change', filterData);
-document.getElementById('status-select').addEventListener('change', filterData);
-document.getElementById('search-input').addEventListener('input', filterData);
-
-window.addEventListener('DOMContentLoaded', loadData);
