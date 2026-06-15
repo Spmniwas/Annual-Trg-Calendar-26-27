@@ -6,63 +6,44 @@ let filteredData = [];   // Holds currently active filtered data
 let currentPage = 1;     // Tracks current pagination view
 const ROWS_PER_PAGE = 50; // Triggers page break after 50 records
 
-// Helper function to safely parse dates from format like "16-Apr-2026" or "4-May-2026"
+// Helper function to safely parse dates from format like "16-Apr-2026"
 function parseSheetDate(dateStr) {
     if (!dateStr) return null;
     const cleanedStr = dateStr.trim();
     const parsed = Date.parse(cleanedStr);
     if (!isNaN(parsed)) {
         const d = new Date(parsed);
-        d.setHours(0, 0, 0, 0); // Normalize time to midnight for true date comparisons
+        d.setHours(0, 0, 0, 0); // Normalize to midnight
         return d;
     }
     return null;
 }
 
-// Helper function to dynamically compute the status based on calendar dates and overrides
+// Helper function to dynamically compute status based on calendar dates
 function calculateDynamicStatus(row) {
     const rawStatus = row['Status'] ? row['Status'].trim() : '';
     const lowStatus = rawStatus.toLowerCase();
 
-    // 1. Check for manual overrides first (Cancelled or Postponed)
-    if (lowStatus === 'cancelled' || lowStatus === 'canceled') {
-        return 'Cancelled';
-    }
-    if (lowStatus === 'postponed') {
-        return 'Postponed';
-    }
+    if (lowStatus === 'cancelled' || lowStatus === 'canceled') return 'Cancelled';
+    if (lowStatus === 'postponed') return 'Postponed';
 
-    // Extract and parse timeline fields
     const fromStr = row['From'] || row['From '] || row['from'] || '';
     const toStr = row['To'] || row['To '] || row['to'] || '';
     
     const fromDate = parseSheetDate(fromStr);
     const toDate = parseSheetDate(toStr);
     
-    // Get current actual system calendar date normalized to midnight
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Fallback if spreadsheet dates are missing or improperly formatted
-    if (!fromDate || !toDate) {
-        return rawStatus || 'Upcoming';
-    }
+    if (!fromDate || !toDate) return rawStatus || 'Upcoming';
+    if (today > toDate) return 'Completed';
+    if (today >= fromDate && today <= toDate) return 'In-progress';
 
-    // 2. Completed: If the To date has already crossed today's calendar date
-    if (today > toDate) {
-        return 'Completed';
-    }
-
-    // 3. In-progress: If today falls within or matches the From and To date boundaries
-    if (today >= fromDate && today <= toDate) {
-        return 'In-progress';
-    }
-
-    // 4. Default: If the course timeline sits entirely in the future
     return 'Upcoming';
 }
 
-// Fetch and parse the data from Google Sheets
+// Fetch and parse data
 function loadData() {
     Papa.parse(SHEET_CSV_URL, {
         download: true,
@@ -71,13 +52,12 @@ function loadData() {
         complete: function(results) {
             currentData = results.data;
             
-            // Pre-calculate the dynamic status for every row immediately on load
             currentData.forEach(row => {
                 row['CalculatedStatus'] = calculateDynamicStatus(row);
             });
 
             setupDropdowns(currentData);
-            filterData(); // Applies default filters on initial load
+            filterData(); 
         },
         error: function(err) {
             console.error("Error loading spreadsheet data:", err);
@@ -85,7 +65,7 @@ function loadData() {
     });
 }
 
-// Dynamically fill the dropdown filters with unique values from your sheet
+// Set up filter menus dynamically
 function setupDropdowns(data) {
     const programSelect = document.getElementById('program-select');
     const modeSelect = document.getElementById('mode-select');
@@ -94,15 +74,14 @@ function setupDropdowns(data) {
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
     
-    // Create a specific default option combining both active training categories
-    statusSelect.innerHTML = '<option value="active_default" selected>Active Trainings (In-progress & Upcoming)</option>';
+    // Inject the special dual default rule option safely
+    statusSelect.innerHTML = '<option value="active_default">Active Trainings (In-progress & Upcoming)</option>';
     statusSelect.innerHTML += '<option value="all">All Statuses</option>';
 
     const programs = new Set();
     const modes = new Set();
     const statuses = new Set();
 
-    // Ensure our standard individual status categories are in the list options
     statuses.add('Upcoming');
     statuses.add('In-progress');
     statuses.add('Completed');
@@ -117,17 +96,13 @@ function setupDropdowns(data) {
     modes.forEach(m => { if(m) modeSelect.add(new Option(m, m)); });
     
     statuses.forEach(s => { 
-        if(s) {
-            const option = new Option(s, s);
-            statusSelect.add(option);
-        }
+        if(s) statusSelect.add(new Option(s, s));
     });
     
-    // Enforce our combined active filter selection on visual layout box load
     statusSelect.value = "active_default";
 }
 
-// Filter data when a user changes any dropdown selection or types a keyword
+// Filter data execution logic
 function filterData() {
     const programFilter = document.getElementById('program-select').value.trim().toLowerCase();
     const modeFilter = document.getElementById('mode-select').value.trim().toLowerCase();
@@ -142,12 +117,10 @@ function filterData() {
         const matchesProgram = programFilter === 'all' || rowProgram === programFilter;
         const matchesMode = modeFilter === 'all' || rowMode === modeFilter;
         
-        // Advanced Status Filter Check: Matches individual choice OR our custom dual default
         let matchesStatus = false;
         if (statusFilter === 'all') {
             matchesStatus = true;
         } else if (statusFilter === 'active_default') {
-            // Allows BOTH 'in-progress' and 'upcoming' records to pass through initially
             matchesStatus = (rowStatus === 'in-progress' || rowStatus === 'upcoming');
         } else {
             matchesStatus = rowStatus === statusFilter;
@@ -171,7 +144,7 @@ function filterData() {
     renderTablePage();
 }
 
-// Display the streamlined table layout
+// Render dynamic rows
 function renderTablePage() {
     const headersRow = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
@@ -208,3 +181,82 @@ function renderTablePage() {
 
     pageDataChunk.forEach((row, index) => {
         const tr = document.createElement('tr');
+        displayHeaders.forEach(header => {
+            const td = document.createElement('td');
+            
+            if (header === 'Programme Title') {
+                const titleText = row['Course Title'] ? row['Course Title'].trim() : '';
+                const progName = row['Program Name'] ? row['Program Name'].trim() : '';
+                const modeText = row['Mode of training'] ? row['Mode of training'].trim() : '';
+                const durationText = row['Duration'] ? row['Duration'].trim() : '';
+                const codeText = row['Course code'] ? row['Course code'].trim() : '';
+                const batchText = row['Batch'] ? row['Batch'].trim() : '';
+
+                let badgeClass = 'badge-default';
+                if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
+                if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
+
+                td.innerHTML = `
+                    <div class="title-main">${titleText}</div>
+                    <div class="metadata-row">
+                        <span class="meta-badge ${badgeClass}">🏷️ ${progName}</span>
+                        <span class="meta-item">💻 ${modeText}</span>
+                        <span class="meta-item">⏱️ ${durationText}</span>
+                        <span class="meta-item">🔑 ${codeText}</span>
+                        <span class="meta-item">👥 ${batchText}</span>
+                    </div>
+                `;
+            } 
+            else if (header === 'Sr. No.') {
+                td.textContent = startIndex + index + 1;
+            }
+            else if (header === 'From') {
+                let cellValue = row['From'] || row['From '] || row['from'] || '';
+                td.textContent = cellValue ? cellValue.trim() : '';
+            } 
+            else if (header === 'Status') {
+                td.textContent = row['CalculatedStatus'];
+            }
+            else if (header === 'Link') {
+                let cellValue = row['Link'] ? row['Link'].trim() : '';
+                if (cellValue && cellValue.startsWith('http')) {
+                    td.innerHTML = `<a href="${cellValue}" target="_blank">Submit Nomination</a>`;
+                } else {
+                    td.textContent = '';
+                }
+            } 
+            else {
+                let cellValue = row[header];
+                td.textContent = cellValue ? cellValue.trim() : '';
+            }
+            
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+}
+
+// Event Listeners
+document.getElementById('prev-btn').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTablePage();
+        document.querySelector('.table-container').scrollTop = 0; 
+    }
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredData.length / ROWS_PER_PAGE);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTablePage();
+        document.querySelector('.table-container').scrollTop = 0; 
+    }
+});
+
+document.getElementById('program-select').addEventListener('change', filterData);
+document.getElementById('mode-select').addEventListener('change', filterData);
+document.getElementById('status-select').addEventListener('change', filterData);
+document.getElementById('search-input').addEventListener('input', filterData);
+
+window.addEventListener('DOMContentLoaded', loadData);
