@@ -74,9 +74,9 @@ function setupDropdowns(data) {
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
     
-    // Inject the special dual default rule option safely
-    statusSelect.innerHTML = '<option value="active_default">Active Trainings (In-progress & Upcoming)</option>';
-    statusSelect.innerHTML += '<option value="all">All Statuses</option>';
+    // Updated text labels to match your preferred shorter formatting styles perfectly
+    statusSelect.innerHTML = '<option value="active_default">In-progress & Upcoming</option>';
+    statusSelect.innerHTML += '<option value="all">All Status</option>';
 
     const programs = new Set();
     const modes = new Set();
