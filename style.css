@@ -7,16 +7,16 @@ body {
     color: #333;
 }
 
-/* Header design styled as an aligned flex container for the logo logo layout */
+/* Header design styled as an aligned flex container for the logo layout */
 header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 25px;
     margin-bottom: 30px;
     background: #0056b3;
     color: white;
-    padding: 20px;
+    padding: 15px 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     flex-wrap: wrap; /* Keeps responsive layout neat on smaller laptop viewports */
@@ -26,35 +26,27 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* Prevents the logo container from shifting sizes */
 }
 
-/* Fine-tune dimensions for clean presentation rendering */
+/* FORCED STRICT LOGO DIMENSIONS */
 .dashboard-logo {
-    height: 65px; /* Fits comfortably inside the blue banner layout frame boundary */
-    width: auto;
+    height: 70px !important;  /* Locks the height securely */
+    width: auto !important;    /* Scales width perfectly in proportion */
+    max-height: 70px;
     object-fit: contain;
-    background-color: rgba(255, 255, 255, 0.95); /* Adds a crisp soft backdrop shield layer */
-    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.95); /* Adds a crisp soft white backdrop shield */
+    padding: 6px;
     border-radius: 6px;
+    display: block;
 }
 
 .header-text-container {
     text-align: left;
 }
 
-/* On mobile views layout centers naturally */
-@media (max-width: 600px) {
-    header {
-        text-align: center;
-        flex-direction: column;
-    }
-    .header-text-container {
-        text-align: center;
-    }
-}
-
 header h1 {
-    margin: 0 0 5px 0;
+    margin: 0 0 3px 0;
     font-size: 24px;
 }
 
@@ -62,6 +54,18 @@ header p {
     margin: 0;
     opacity: 0.9;
     font-size: 14px;
+}
+
+/* On mobile views layout centers naturally */
+@media (max-width: 650px) {
+    header {
+        text-align: center;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .header-text-container {
+        text-align: center;
+    }
 }
 
 /* Dropdown filters container layout */
