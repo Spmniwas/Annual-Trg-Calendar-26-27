@@ -7,15 +7,50 @@ body {
     color: #333;
 }
 
-/* Header design */
+/* Header design styled as an aligned flex container for the logo logo layout */
 header {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
     margin-bottom: 30px;
     background: #0056b3;
     color: white;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    flex-wrap: wrap; /* Keeps responsive layout neat on smaller laptop viewports */
+}
+
+.header-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fine-tune dimensions for clean presentation rendering */
+.dashboard-logo {
+    height: 65px; /* Fits comfortably inside the blue banner layout frame boundary */
+    width: auto;
+    object-fit: contain;
+    background-color: rgba(255, 255, 255, 0.95); /* Adds a crisp soft backdrop shield layer */
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.header-text-container {
+    text-align: left;
+}
+
+/* On mobile views layout centers naturally */
+@media (max-width: 600px) {
+    header {
+        text-align: center;
+        flex-direction: column;
+    }
+    .header-text-container {
+        text-align: center;
+    }
 }
 
 header h1 {
@@ -76,7 +111,7 @@ select:focus, input:focus {
     border-color: #0056b3;
 }
 
-/* Fixed Table container height to make the floating headers work perfectly */
+/* Fixed Table container height to make floating headers work perfectly */
 .table-container {
     background: white;
     padding: 15px;
@@ -84,7 +119,7 @@ select:focus, input:focus {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     overflow-x: auto; 
     overflow-y: auto;
-    max-height: 650px; /* Limits table height so headers lock at the top when scrolling */
+    max-height: 650px; 
 }
 
 table {
@@ -100,7 +135,6 @@ th, td {
     vertical-align: top;
 }
 
-/* Sticky floating headers configuration */
 th {
     background-color: #f8f9fa;
     color: #495057;
@@ -131,7 +165,6 @@ th {
     color: #666;
 }
 
-/* Inline Metadata Elements */
 .meta-item {
     background-color: #f1f3f5;
     padding: 2px 6px;
@@ -139,7 +172,6 @@ th {
     font-weight: 500;
 }
 
-/* Program Specific Custom Background Badges */
 .meta-badge {
     padding: 2px 8px;
     border-radius: 4px;
@@ -147,21 +179,20 @@ th {
 }
 
 .badge-jjm {
-    background-color: #e3f2fd; /* Light Blue */
+    background-color: #e3f2fd; 
     color: #0d47a1;
 }
 
 .badge-sbm {
-    background-color: #e8f5e9; /* Light Green */
+    background-color: #e8f5e9; 
     color: #1b5e20;
 }
 
 .badge-default {
-    background-color: #e9ecef; /* Light Gray for other entries */
+    background-color: #e9ecef; 
     color: #495057;
 }
 
-/* Restrict the width of the main title block cell nicely */
 th:nth-child(2), td:nth-child(2) {
     min-width: 300px;
     max-width: 450px;
@@ -171,7 +202,6 @@ tr:hover {
     background-color: #f8fafd;
 }
 
-/* Interactive link buttons styling */
 td a {
     color: #0056b3;
     text-decoration: none;
@@ -189,7 +219,6 @@ td a:hover {
     color: white;
 }
 
-/* Pagination buttons hover states */
 #prev-btn:hover:not(:disabled), #next-btn:hover:not(:disabled) {
     background-color: #f0f4f8 !important;
     border-color: #0056b3 !important;
