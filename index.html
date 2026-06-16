@@ -10,11 +10,18 @@
 <body>
 
     <header>
-        <h1>SPM NIWAS Annual Training Calendar</h1>
-        <p>Interactive Dashboard</p>
+        <!-- Logo Display Block Container -->
+        <div class="header-logo-container">
+            <img src="logo.png" alt="SPM NIWAS Logo" class="dashboard-logo" onerror="this.style.display='none';">
+        </div>
+        <div class="header-text-container">
+            <h1>SPM NIWAS Annual Training Calendar</h1>
+            <p>Interactive Dashboard</p>
+        </div>
     </header>
 
     <main>
+        <!-- Filter Dropdowns Section -->
         <section class="filter-container">
             <div class="filter-group">
                 <label for="program-select">Program Name</label>
@@ -33,25 +40,31 @@
             <div class="filter-group">
                 <label for="status-select">Status</label>
                 <select id="status-select">
-                    </select>
+                    <!-- Options are handled completely and dynamically by app.js -->
+                </select>
             </div>
 
+            <!-- Keyword Search Bar Block -->
             <div class="filter-group" style="flex-grow: 1; min-width: 250px;">
                 <label for="search-input">Search Training</label>
                 <input type="text" id="search-input" placeholder="Type any keyword (e.g., Solar, Online, JJM)...">
             </div>
         </section>
 
+        <!-- Data Table Section -->
         <section class="table-container">
             <table id="calendar-table">
                 <thead>
                     <tr id="table-headers">
-                        </tr>
+                        <!-- Column headers appear here dynamically -->
+                    </tr>
                 </thead>
                 <tbody id="table-body">
-                    </tbody>
+                    <!-- Training records appear here dynamically -->
+                </tbody>
             </table>
 
+            <!-- Pagination Control Footers Section -->
             <div id="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
                 <button id="prev-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">Previous</button>
                 <span id="page-info" style="font-size: 14px; font-weight: 600; color: #555;">Page 1 of 1</span>
