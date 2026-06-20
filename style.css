@@ -2,41 +2,47 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0 0 20px 0; /* Removed top padding so the header sits flush at the very top */
     background-color: #f4f6f9;
     color: #333;
 }
 
-/* Header design styled as an aligned flex container for the logo layout */
+/* Header design matching the flat, full-bleed Notice Board layout */
 header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 25px;
-    margin-bottom: 30px;
+    justify-content: flex-start; /* Aligns items to the left instead of centered */
+    gap: 20px;
+    margin-bottom: 25px;
     background: #0056b3;
     color: white;
-    padding: 15px 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    flex-wrap: wrap; /* Keeps responsive layout neat on smaller laptop viewports */
+    padding: 15px 30px; /* Thinner vertical padding for a compact height */
+    border-radius: 0; /* Removes rounded corners to go screen-wide */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Wrap the rest of your main dashboard content to add clean side-spacing */
+main {
+    padding: 0 20px;
 }
 
 .header-logo-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0; /* Prevents the logo container from shifting sizes */
+    flex-shrink: 0;
 }
 
-/* FORCED STRICT LOGO DIMENSIONS */
+/* Strictly managed logo sizing inside the compact header */
 .dashboard-logo {
-    height: 70px !important;  /* Locks the height securely */
-    width: auto !important;    /* Scales width perfectly in proportion */
-    max-height: 70px;
+    height: 50px !important;  /* Slightly reduced to match a sleeker bar height */
+    width: auto !important;
+    max-height: 50px;
     object-fit: contain;
-    background-color: rgba(255, 255, 255, 0.95); /* Adds a crisp soft white backdrop shield */
-    padding: 6px;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 4px;
     border-radius: 6px;
     display: block;
 }
@@ -46,25 +52,24 @@ header {
 }
 
 header h1 {
-    margin: 0 0 3px 0;
-    font-size: 24px;
+    margin: 0 0 2px 0;
+    font-size: 22px; /* Adjusted slightly down for a cleaner profile */
+    font-weight: 600;
 }
 
 header p {
     margin: 0;
-    opacity: 0.9;
-    font-size: 14px;
+    opacity: 0.85;
+    font-size: 13px;
 }
 
-/* On mobile views layout centers naturally */
+/* On mobile views layout adjusts cleanly */
 @media (max-width: 650px) {
     header {
+        justify-content: center;
         text-align: center;
-        flex-direction: column;
-        gap: 15px;
-    }
-    .header-text-container {
-        text-align: center;
+        gap: 12px;
+        padding: 15px;
     }
 }
 
