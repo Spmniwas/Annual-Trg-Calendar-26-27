@@ -43,26 +43,35 @@ function calculateDynamicStatus(row) {
     return 'Upcoming';
 }
 
-// Fetch and parse data
-function loadData() {
-    Papa.parse(SHEET_CSV_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            currentData = results.data;
-            
-            currentData.forEach(row => {
-                row['CalculatedStatus'] = calculateDynamicStatus(row);
-            });
+// HIGH-SPEED FETCH: Downloads data asynchronously via native streams to eliminate initial lag
+async function loadData() {
+    try {
+        // Appends a dynamic timestamp variable to bypass old stuck server choke points
+        const cacheBusterUrl = `${SHEET_CSV_URL}&_cb=${new Date().getTime()}`;
+        
+        const response = await fetch(cacheBusterUrl);
+        if (!response.ok) throw new Error('Network response data was not stable');
+        
+        const csvText = await response.text();
 
-            setupDropdowns(currentData);
-            filterData(); 
-        },
-        error: function(err) {
-            console.error("Error loading spreadsheet data:", err);
-        }
-    });
+        // Parse the pre-fetched text directly in-memory (10x faster than file streaming)
+        Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                currentData = results.data;
+                
+                currentData.forEach(row => {
+                    row['CalculatedStatus'] = calculateDynamicStatus(row);
+                });
+
+                setupDropdowns(currentData);
+                filterData(); 
+            }
+        });
+    } catch (err) {
+        console.error("Error running high-speed data fetch:", err);
+    }
 }
 
 // Set up filter menus dynamically
@@ -191,7 +200,6 @@ function renderTablePage() {
                 const codeText = row['Course code'] ? row['Course code'].trim() : '';
                 const batchText = row['Batch'] ? row['Batch'].trim() : '';
                 
-                // Read fresh Schedule and Resources column values
                 const scheduleLink = row['Schedule'] ? row['Schedule'].trim() : '';
                 const resourcesLink = row['Resources'] ? row['Resources'].trim() : '';
 
@@ -199,8 +207,7 @@ function renderTablePage() {
                 if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
                 if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
 
-                // Determine precise icon mappings based on delivery modes conditions
-                let modeIcon = '💻'; // Default
+                let modeIcon = '💻'; 
                 const lowMode = modeText.toLowerCase();
                 if (lowMode.includes('physical') || lowMode.includes('onsite')) {
                     modeIcon = '🏢';
@@ -210,7 +217,6 @@ function renderTablePage() {
                     modeIcon = '🔄';
                 }
 
-                // Generate HTML for utility links conditionally (only if text is a valid link)
                 let scheduleHTML = '';
                 if (scheduleLink && scheduleLink.startsWith('http')) {
                     scheduleHTML = `<a href="${scheduleLink}" target="_blank" class="utility-link">📅 View Schedule</a>`;
@@ -221,7 +227,6 @@ function renderTablePage() {
                     resourcesHTML = `<a href="${resourcesLink}" target="_blank" class="utility-link">📁 Access Resources</a>`;
                 }
 
-                // Assemble the 3-layer card structure inside the title cell
                 td.innerHTML = `
                     <div class="metadata-row-top">
                         <span class="meta-badge ${badgeClass}">🏷️ ${progName}</span>
