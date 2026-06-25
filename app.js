@@ -190,19 +190,50 @@ function renderTablePage() {
                 const durationText = row['Duration'] ? row['Duration'].trim() : '';
                 const codeText = row['Course code'] ? row['Course code'].trim() : '';
                 const batchText = row['Batch'] ? row['Batch'].trim() : '';
+                
+                // Read fresh Schedule and Resources column values
+                const scheduleLink = row['Schedule'] ? row['Schedule'].trim() : '';
+                const resourcesLink = row['Resources'] ? row['Resources'].trim() : '';
 
                 let badgeClass = 'badge-default';
                 if (progName.toLowerCase() === 'jjm') badgeClass = 'badge-jjm';
                 if (progName.toLowerCase() === 'sbm') badgeClass = 'badge-sbm';
 
+                // Determine precise icon mappings based on delivery modes conditions
+                let modeIcon = '💻'; // Default
+                const lowMode = modeText.toLowerCase();
+                if (lowMode.includes('physical') || lowMode.includes('onsite')) {
+                    modeIcon = '🏢';
+                } else if (lowMode.includes('online')) {
+                    modeIcon = '🌐';
+                } else if (lowMode.includes('hybrid')) {
+                    modeIcon = '🔄';
+                }
+
+                // Generate HTML for utility links conditionally (only if text is a valid link)
+                let scheduleHTML = '';
+                if (scheduleLink && scheduleLink.startsWith('http')) {
+                    scheduleHTML = `<a href="${scheduleLink}" target="_blank" class="utility-link">📅 View Schedule</a>`;
+                }
+
+                let resourcesHTML = '';
+                if (resourcesLink && resourcesLink.startsWith('http')) {
+                    resourcesHTML = `<a href="${resourcesLink}" target="_blank" class="utility-link">📁 Access Resources</a>`;
+                }
+
+                // Assemble the 3-layer card structure inside the title cell
                 td.innerHTML = `
-                    <div class="title-main">${titleText}</div>
-                    <div class="metadata-row">
+                    <div class="metadata-row-top">
                         <span class="meta-badge ${badgeClass}">🏷️ ${progName}</span>
-                        <span class="meta-item">💻 ${modeText}</span>
+                        <span class="meta-item">${modeIcon} ${modeText}</span>
                         <span class="meta-item">⏱️ ${durationText}</span>
                         <span class="meta-item">🔑 ${codeText}</span>
                         <span class="meta-item">👥 ${batchText}</span>
+                    </div>
+                    <div class="title-main-layered">${titleText}</div>
+                    <div class="metadata-row-bottom">
+                        ${scheduleHTML}
+                        ${resourcesHTML}
                     </div>
                 `;
             } 
@@ -220,13 +251,11 @@ function renderTablePage() {
                 const currentStatus = row['CalculatedStatus'] ? row['CalculatedStatus'].toLowerCase() : '';
                 let cellValue = row['Link'] ? row['Link'].trim() : '';
                 
-                // If the course is Completed or Cancelled, completely deactivate the link action
                 if (currentStatus === 'completed' || currentStatus === 'cancelled') {
-                    td.innerHTML = `<span style="color: #888; font-size: 12px; font-weight: 500; font-style: italic; white-space: nowrap; display: inline-block; padding: 6px 0;">Closed</span>`;
+                    td.innerHTML = `<span class="closed-label">Closed</span>`;
                 } 
-                // Otherwise, show the active button if a URL exists
                 else if (cellValue && cellValue.startsWith('http')) {
-                    td.innerHTML = `<a href="${cellValue}" target="_blank">Submit Nomination</a>`;
+                    td.innerHTML = `<a href="${cellValue}" target="_blank" class="nomination-btn">Submit Nomination</a>`;
                 } else {
                     td.textContent = '';
                 }
