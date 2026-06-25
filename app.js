@@ -74,7 +74,6 @@ function setupDropdowns(data) {
     programSelect.innerHTML = '<option value="all">All Programs</option>';
     modeSelect.innerHTML = '<option value="all">All Modes</option>';
     
-    // Updated text labels to match your preferred shorter formatting styles perfectly
     statusSelect.innerHTML = '<option value="active_default">In-progress & Upcoming</option>';
     statusSelect.innerHTML += '<option value="all">All Status</option>';
 
@@ -218,8 +217,15 @@ function renderTablePage() {
                 td.textContent = row['CalculatedStatus'];
             }
             else if (header === 'Link') {
+                const currentStatus = row['CalculatedStatus'] ? row['CalculatedStatus'].toLowerCase() : '';
                 let cellValue = row['Link'] ? row['Link'].trim() : '';
-                if (cellValue && cellValue.startsWith('http')) {
+                
+                // If the course is Completed or Cancelled, completely deactivate the link action
+                if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+                    td.innerHTML = `<span style="color: #888; font-size: 12px; font-weight: 500; font-style: italic; white-space: nowrap; display: inline-block; padding: 6px 0;">Closed</span>`;
+                } 
+                // Otherwise, show the active button if a URL exists
+                else if (cellValue && cellValue.startsWith('http')) {
                     td.innerHTML = `<a href="${cellValue}" target="_blank">Submit Nomination</a>`;
                 } else {
                     td.textContent = '';
