@@ -13,7 +13,7 @@ function parseSheetDate(dateStr) {
     const parsed = Date.parse(cleanedStr);
     if (!isNaN(parsed)) {
         const d = new Date(parsed);
-        d.setHours(0, 0, 0, 0); // Normalize to midnight
+        d.setHours(0, 0, 0, 0); 
         return d;
     }
     return null;
@@ -46,25 +46,19 @@ function calculateDynamicStatus(row) {
 // HIGH-SPEED FETCH: Downloads data asynchronously via native streams to eliminate initial lag
 async function loadData() {
     try {
-        // Appends a dynamic timestamp variable to bypass old stuck server choke points
         const cacheBusterUrl = `${SHEET_CSV_URL}&_cb=${new Date().getTime()}`;
-        
         const response = await fetch(cacheBusterUrl);
         if (!response.ok) throw new Error('Network response data was not stable');
-        
         const csvText = await response.text();
 
-        // Parse the pre-fetched text directly in-memory (10x faster than file streaming)
         Papa.parse(csvText, {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
                 currentData = results.data;
-                
                 currentData.forEach(row => {
                     row['CalculatedStatus'] = calculateDynamicStatus(row);
                 });
-
                 setupDropdowns(currentData);
                 filterData(); 
             }
@@ -276,6 +270,52 @@ function renderTablePage() {
     });
 }
 
+// GENERATES IMMACULATE MULTI-PAGE LANDSCAPE PDF DOCS DYNAMICALLY
+function exportDashboardToPDF() {
+    const element = document.getElementById('dashboard-print-area');
+    const downloadButton = document.getElementById('download-pdf-btn');
+    
+    // Temporarily indicate loading state
+    downloadButton.textContent = "⌛ Generating...";
+    downloadButton.disabled = true;
+
+    // High-resolution landscape output layout options configurations
+    const options = {
+        margin: [10, 10, 15, 10], // Generates clean top/bottom margins for headers and footers
+        filename: 'SPM_NIWAS_Training_Calendar_2026-27.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, // Doubles resolution pixels for sharp text readability when printing
+            useCORS: true, 
+            logging: false,
+            scrollY: 0
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    };
+
+    // Generate PDF, append smart dynamic page numbers footer counters, and reset download button
+    html2pdf().set(options).from(element).toPdf().get('pdf').then(function(pdf) {
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(9);
+            pdf.setTextColor(100);
+            // Render beautiful alignment markers at the exact safe margin centers of each page sheet
+            pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 8);
+            pdf.text('SPM NIWAS Training Calendar — Generated Automatically', 12, pdf.internal.pageSize.getHeight() - 8);
+        }
+    }).save().then(() => {
+        // Restore active button status state parameters
+        downloadButton.textContent = "📥 Download PDF";
+        downloadButton.disabled = false;
+    }).catch(err => {
+        console.error("PDF engine crash error log details:", err);
+        downloadButton.textContent = "📥 Download PDF";
+        downloadButton.disabled = false;
+    });
+}
+
 // Event Listeners
 document.getElementById('prev-btn').addEventListener('click', () => {
     if (currentPage > 1) {
@@ -298,5 +338,8 @@ document.getElementById('program-select').addEventListener('change', filterData)
 document.getElementById('mode-select').addEventListener('change', filterData);
 document.getElementById('status-select').addEventListener('change', filterData);
 document.getElementById('search-input').addEventListener('input', filterData);
+
+// Bind the freshly engineered PDF function to your click events loader chain
+document.getElementById('download-pdf-btn').addEventListener('click', exportDashboardToPDF);
 
 window.addEventListener('DOMContentLoaded', loadData);
