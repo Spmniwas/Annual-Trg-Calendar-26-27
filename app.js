@@ -143,31 +143,16 @@ function filterData() {
     });
 
     currentPage = 1; 
-    renderTablePage();
+    renderTableRows(filteredData.slice(0, ROWS_PER_PAGE), 0);
 }
 
-// Render dynamic rows
-function renderTablePage() {
+// Core row builder helper shared between standard pagination views and printing engines
+function renderTableRows(dataChunk, startIndex) {
     const headersRow = document.getElementById('table-headers');
     const tableBody = document.getElementById('table-body');
     
     headersRow.innerHTML = '';
     tableBody.innerHTML = '';
-
-    const totalRecords = filteredData.length;
-    const totalPages = Math.ceil(totalRecords / ROWS_PER_PAGE) || 1;
-
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
-    
-    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-    document.getElementById('prev-btn').disabled = currentPage === 1;
-    document.getElementById('next-btn').disabled = currentPage === totalPages;
-
-    if (totalRecords === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px;">No training records found matching those filters.</td></tr>';
-        return;
-    }
 
     const displayHeaders = ['Sr. No.', 'Programme Title', 'From', 'To', 'Location', 'Status', 'Link'];
     
@@ -177,11 +162,12 @@ function renderTablePage() {
         headersRow.appendChild(th);
     });
 
-    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
-    const endIndex = startIndex + ROWS_PER_PAGE;
-    const pageDataChunk = filteredData.slice(startIndex, endIndex);
+    if (dataChunk.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px;">No training records found matching those filters.</td></tr>';
+        return;
+    }
 
-    pageDataChunk.forEach((row, index) => {
+    dataChunk.forEach((row, index) => {
         const tr = document.createElement('tr');
         displayHeaders.forEach(header => {
             const td = document.createElement('td');
@@ -270,22 +256,39 @@ function renderTablePage() {
     });
 }
 
-// GENERATES IMMACULATE MULTI-PAGE LANDSCAPE PDF DOCS DYNAMICALLY
+// Master interface pagination rendering function
+function renderTablePage() {
+    const totalRecords = filteredData.length;
+    const totalPages = Math.ceil(totalRecords / ROWS_PER_PAGE) || 1;
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    
+    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+    document.getElementById('prev-btn').disabled = currentPage === 1;
+    document.getElementById('next-btn').disabled = currentPage === totalPages;
+
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+    renderTableRows(filteredData.slice(startIndex, startIndex + ROWS_PER_PAGE), startIndex);
+}
+
+// EXPANDED PRINT CONFIGURATION: Temporarily displays every single filtered training row for the PDF engine capture
 function exportDashboardToPDF() {
     const element = document.getElementById('dashboard-print-area');
     const downloadButton = document.getElementById('download-pdf-btn');
     
-    // Temporarily indicate loading state
     downloadButton.textContent = "⌛ Generating...";
     downloadButton.disabled = true;
 
-    // High-resolution landscape output layout options configurations
+    // 1. Temporarily populate the table with ALL currently filtered data records
+    renderTableRows(filteredData, 0);
+
     const options = {
-        margin: [10, 10, 15, 10], // Generates clean top/bottom margins for headers and footers
+        margin: [10, 10, 15, 10], 
         filename: 'SPM_NIWAS_Training_Calendar_2026-27.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-            scale: 2, // Doubles resolution pixels for sharp text readability when printing
+            scale: 2, 
             useCORS: true, 
             logging: false,
             scrollY: 0
@@ -294,23 +297,24 @@ function exportDashboardToPDF() {
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // Generate PDF, append smart dynamic page numbers footer counters, and reset download button
+    // 2. Execute the PDF compile engine
     html2pdf().set(options).from(element).toPdf().get('pdf').then(function(pdf) {
         const totalPages = pdf.internal.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
             pdf.setPage(i);
             pdf.setFontSize(9);
             pdf.setTextColor(100);
-            // Render beautiful alignment markers at the exact safe margin centers of each page sheet
             pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 8);
             pdf.text('SPM NIWAS Training Calendar — Generated Automatically', 12, pdf.internal.pageSize.getHeight() - 8);
         }
     }).save().then(() => {
-        // Restore active button status state parameters
+        // 3. Reset the dashboard interface back to your clean pagination chunk layout view smoothly
+        renderTablePage();
         downloadButton.textContent = "📥 Download PDF";
         downloadButton.disabled = false;
     }).catch(err => {
-        console.error("PDF engine crash error log details:", err);
+        console.error("PDF engine crash error details:", err);
+        renderTablePage();
         downloadButton.textContent = "📥 Download PDF";
         downloadButton.disabled = false;
     });
@@ -339,7 +343,6 @@ document.getElementById('mode-select').addEventListener('change', filterData);
 document.getElementById('status-select').addEventListener('change', filterData);
 document.getElementById('search-input').addEventListener('input', filterData);
 
-// Bind the freshly engineered PDF function to your click events loader chain
 document.getElementById('download-pdf-btn').addEventListener('click', exportDashboardToPDF);
 
 window.addEventListener('DOMContentLoaded', loadData);
