@@ -6,72 +6,71 @@
     <title>SPM NIWAS Training Calendar 2026-27</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-    <header>
-        <!-- Logo Display Block Container -->
-        <div class="header-logo-container">
-            <img src="logo.png" alt="SPM NIWAS Logo" class="dashboard-logo" height="70" style="max-height: 70px; width: auto;" onerror="this.style.display='none';">
-        </div>
-        <div class="header-text-container">
-            <h1>SPM NIWAS Annual Training Calendar</h1>
-            <p>Interactive Dashboard</p>
-        </div>
-    </header>
-
-    <main>
-        <!-- Filter Dropdowns Section -->
-        <section class="filter-container">
-            <div class="filter-group">
-                <label for="program-select">Program Name</label>
-                <select id="program-select">
-                    <option value="all">All Programs</option>
-                </select>
+    <div id="dashboard-print-area">
+        <header>
+            <div class="header-logo-container">
+                <img src="logo.png" alt="SPM NIWAS Logo" class="dashboard-logo" height="50" style="max-height: 50px; width: auto;" onerror="this.style.display='none';">
             </div>
-
-            <div class="filter-group">
-                <label for="mode-select">Mode of Delivery</label>
-                <select id="mode-select">
-                    <option value="all">All Modes</option>
-                </select>
+            <div class="header-text-container">
+                <h1>SPM NIWAS Annual Training Calendar</h1>
+                <p>Interactive Dashboard</p>
             </div>
+        </header>
 
-            <div class="filter-group">
-                <label for="status-select">Status</label>
-                <select id="status-select">
-                    <!-- Options are handled completely and dynamically by app.js -->
-                </select>
-            </div>
+        <main>
+            <section class="filter-container">
+                <div class="filter-group">
+                    <label for="program-select">Program Name</label>
+                    <select id="program-select">
+                        <option value="all">All Programs</option>
+                    </select>
+                </div>
 
-            <!-- Keyword Search Bar Block -->
-            <div class="filter-group" style="flex-grow: 1; min-width: 250px;">
-                <label for="search-input">Search Training</label>
-                <input type="text" id="search-input" placeholder="Type any keyword (e.g., Solar, Online, JJM)...">
-            </div>
-        </section>
+                <div class="filter-group">
+                    <label for="mode-select">Mode of Delivery</label>
+                    <select id="mode-select">
+                        <option value="all">All Modes</option>
+                    </select>
+                </div>
 
-        <!-- Data Table Section -->
-        <section class="table-container">
-            <table id="calendar-table">
-                <thead>
-                    <tr id="table-headers">
-                        <!-- Column headers appear here dynamically -->
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Training records appear here dynamically -->
-                </tbody>
-            </table>
+                <div class="filter-group">
+                    <label for="status-select">Status</label>
+                    <select id="status-select">
+                        </select>
+                </div>
 
-            <!-- Pagination Control Footers Section -->
-            <div id="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
-                <button id="prev-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">Previous</button>
-                <span id="page-info" style="font-size: 14px; font-weight: 600; color: #555;">Page 1 of 1</span>
-                <button id="next-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">Next</button>
-            </div>
-        </section>
-    </main>
+                <div class="filter-group" style="flex-grow: 1; min-width: 200px;">
+                    <label for="search-input">Search Training</label>
+                    <input type="text" id="search-input" placeholder="Type any keyword...">
+                </div>
+
+                <div class="filter-group" class="no-pdf-print" style="justify-content: flex-end;">
+                    <button id="download-pdf-btn" type="button">📥 Download PDF</button>
+                </div>
+            </section>
+
+            <section class="table-container">
+                <table id="calendar-table">
+                    <thead>
+                        <tr id="table-headers">
+                            </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        </tbody>
+                </table>
+
+                <div id="pagination-controls" class="no-pdf-print" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
+                    <button id="prev-btn">Previous</button>
+                    <span id="page-info" style="font-size: 14px; font-weight: 600; color: #555;">Page 1 of 1</span>
+                    <button id="next-btn">Next</button>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script src="app.js"></script>
 </body>
