@@ -143,7 +143,7 @@ function filterData() {
     });
 
     currentPage = 1; 
-    renderTableRows(filteredData.slice(0, ROWS_PER_PAGE), 0);
+    renderTablePage();
 }
 
 // Core row builder helper shared between standard pagination views and printing engines
@@ -276,11 +276,18 @@ function renderTablePage() {
 function exportDashboardToPDF() {
     const element = document.getElementById('dashboard-print-area');
     const downloadButton = document.getElementById('download-pdf-btn');
+    const container = document.querySelector('.table-container');
     
     downloadButton.textContent = "⌛ Generating...";
     downloadButton.disabled = true;
 
-    // 1. Temporarily populate the table with ALL currently filtered data records
+    // FORCES THE CONTAINER TO DROP SCROLL LIMITS TEMPORARILY SO ALL BROKEN PAGES CAPTURE
+    if (container) {
+        container.style.maxHeight = 'none';
+        container.style.overflow = 'visible';
+    }
+
+    // Populate the table with ALL currently active filtered data records
     renderTableRows(filteredData, 0);
 
     const options = {
@@ -297,7 +304,7 @@ function exportDashboardToPDF() {
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // 2. Execute the PDF compile engine
+    // Execute the PDF compile engine
     html2pdf().set(options).from(element).toPdf().get('pdf').then(function(pdf) {
         const totalPages = pdf.internal.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
@@ -308,12 +315,20 @@ function exportDashboardToPDF() {
             pdf.text('SPM NIWAS Training Calendar — Generated Automatically', 12, pdf.internal.pageSize.getHeight() - 8);
         }
     }).save().then(() => {
-        // 3. Reset the dashboard interface back to your clean pagination chunk layout view smoothly
+        // Reset styles back to live screen dashboard configurations
+        if (container) {
+            container.style.maxHeight = '650px';
+            container.style.overflow = 'auto';
+        }
         renderTablePage();
         downloadButton.textContent = "📥 Download PDF";
         downloadButton.disabled = false;
     }).catch(err => {
         console.error("PDF engine crash error details:", err);
+        if (container) {
+            container.style.maxHeight = '650px';
+            container.style.overflow = 'auto';
+        }
         renderTablePage();
         downloadButton.textContent = "📥 Download PDF";
         downloadButton.disabled = false;
