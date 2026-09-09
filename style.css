@@ -97,7 +97,7 @@ select, input[type="text"] {
     padding: 10px 14px;
     border-radius: 6px;
     border: 1px solid #ccc;
-    min-width: 220px;
+    min-width: 200px;
     font-size: 14px;
     background-color: #fff;
     cursor: pointer;
@@ -109,10 +109,33 @@ input[type="text"] {
     cursor: text;
 }
 
-/* Styled Download PDF Button Layout */
+/* Training Report Link Button Styling */
+#report-dashboard-btn {
+    padding: 10px 16px;
+    background-color: #e6effc;
+    color: #0056b3;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid #0056b3;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease-in-out;
+    white-space: nowrap;
+    height: 41px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+#report-dashboard-btn:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Download PDF Button Layout */
 #download-pdf-btn {
     padding: 11px 20px;
-    background-color: #28a745; /* Clean professional green */
+    background-color: #28a745;
     color: white;
     font-weight: 600;
     font-size: 14px;
@@ -286,20 +309,9 @@ tr:hover {
     cursor: not-allowed;
 }
 
-/* STOPS SCROLL CRADLE TRUNCATIONS AND HIDES BUTTONS DURING EXPORT ENGINE LOADS */
-.html2pdf__page-break {
-    page-break-before: always;
-}
-
+/* Hides navigation buttons in PDF output automatically */
 @media print {
     .no-pdf-print, .filter-container, #pagination-controls {
         display: none !important;
-    }
-    .table-container {
-        max-height: none !important;
-        overflow: visible !important;
-    }
-    th {
-        position: static !important;
     }
 }
