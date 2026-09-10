@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPM NIWAS Training Calendar 2026-27</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Essential external scripts for parsing data and generating high-res PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
+    <!-- Wrapped in a pdf-ready container to ensure full style captures during export prints -->
     <div id="dashboard-print-area">
         <header>
             <div class="header-logo-container">
@@ -22,6 +24,7 @@
         </header>
 
         <main>
+            <!-- Filter Dropdowns & Control Buttons Section -->
             <section class="filter-container">
                 <div class="filter-group">
                     <label for="program-select">Program Name</label>
@@ -40,7 +43,8 @@
                 <div class="filter-group">
                     <label for="status-select">Status</label>
                     <select id="status-select">
-                        </select>
+                        <!-- Options are handled completely and dynamically by app.js -->
+                    </select>
                 </div>
 
                 <div class="filter-group" style="flex-grow: 1; min-width: 200px;">
@@ -48,21 +52,27 @@
                     <input type="text" id="search-input" placeholder="Type any keyword...">
                 </div>
 
-                <div class="filter-group" class="no-pdf-print" style="justify-content: flex-end;">
+                <!-- Navigation & Export Action Buttons Block -->
+                <div class="filter-group no-pdf-print" style="justify-content: flex-end; flex-direction: row; align-items: flex-end; gap: 10px;">
+                    <a href="https://spmniwas.github.io/spm-niwas-training-dashboard/" target="_blank" id="report-dashboard-btn">📊 Training Report</a>
                     <button id="download-pdf-btn" type="button">📥 Download PDF</button>
                 </div>
             </section>
 
+            <!-- Data Table Section -->
             <section class="table-container">
                 <table id="calendar-table">
                     <thead>
                         <tr id="table-headers">
-                            </tr>
+                            <!-- Column headers appear here dynamically -->
+                        </tr>
                     </thead>
                     <tbody id="table-body">
-                        </tbody>
+                        <!-- Training records appear here dynamically -->
+                    </tbody>
                 </table>
 
+                <!-- Pagination Control Footers Section -->
                 <div id="pagination-controls" class="no-pdf-print" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
                     <button id="prev-btn">Previous</button>
                     <span id="page-info" style="font-size: 14px; font-weight: 600; color: #555;">Page 1 of 1</span>
